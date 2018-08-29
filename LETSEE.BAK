@@ -1,0 +1,459 @@
+#include<iostream.h>
+#include<conio.h>
+#include<stdlib.h>
+#include<stdio.h>
+#include<ctype.h>
+#include<string.h>
+#include<fstream.h>
+#include<time.h>
+#include<dos.h>
+
+
+fstream data,index,secind;
+
+char pri[125][15],sec[125][40],usn[125][20];
+int ind[125],count,count1,i,j;
+void sort1(),sort2();
+
+class Tele
+{
+	private:
+		char num[20],name[20],address[50],group[30],work[30];
+
+		friend directory;
+};
+
+class directory
+{
+	private:
+		Tele a;
+	public: void Sorteddisplay();
+		void Insert();
+		void Delete();
+		void showall();
+		void DisplayI();
+		void LoadIndex();
+		void WriteIndex();
+		void Erase();
+};
+
+void directory::Insert()
+{
+	directory I;
+	fstream data;
+	char Buffer[100];
+	int high=count,pos;
+	data.open("data.txt",ios::app);
+	data.seekg(0,ios::end);
+	pos=data.tellg();
+
+	cout<<"\nEnter your details!";
+	cout<<"\n\nNumber : ";
+	cin>>a.num;
+	for(int low=0;low<=high;)
+	{
+		int mid=(low+high)/2;
+		int k=atoi(pri[mid]),m=atoi(a.num);
+		if(k==m)
+		{
+			cout<<"THE NUBMER ALREADY IN LIST!!!\n(Or what you entered is not a number.)";
+			return;
+		}
+		else if(m<k)
+			high=mid-1;
+		else if(m>k)
+		{
+			low=mid+1;
+		}
+
+	}
+	cout<<"\nName : ";cin>>a.name;
+	cout<<"\nAddress : ";cin>>a.address;
+	cout<<"\nWork : ";cin>>a.work;
+	cout<<"\nGroup : ";cin>>a.group;
+	sprintf(Buffer,"|%s|%s|%s|%s|%s|#",a.num,a.name,a.address,a.work,a.group);
+	data<<Buffer;
+	strcpy(pri[count],a.num);
+	ind[count]=pos;
+	strcpy(sec[count1],a.name);
+	strcpy(usn[count1],a.num);
+	count++;
+	count1++;
+	I.WriteIndex();
+	cout<<"Contact successfully entered!!";
+	getch();
+	data.close();
+}
+
+int bsearch(int *mid1,int *mid)
+{
+	int low=0,high=count,low1=0,high1=count1,k,m;
+	char name[20];
+	cout<<"\nEnter Name : ";
+	cin>>name;
+	for(low=0;low<=high;)
+	{
+		*mid=(low+high)/2;
+		if(strcmpi(sec[*mid],name)==0)
+		{       for(low1=0;low1<=high1;)  //this was causing the problem.
+			{
+				*mid1=(low1+high1)/2;
+				k=atoi(pri[*mid1]),m=atoi(usn[*mid]);
+				if(k==m)
+				{
+					return 1;
+				}
+				else if(m<k)
+				{
+					high1=*mid1-1;
+				}
+				else if(m>k)
+				{
+					low1=*mid1+1;
+				}
+			}
+		}
+	else if(strcmpi(sec[*mid],name)>0)
+		high=*mid-1;
+	else if(strcmpi(sec[*mid],name)<0)
+		low=*mid+1;
+	}
+	return 0;
+}
+void directory::Delete()
+{
+	directory I;
+	char Buffer[100];
+	int flag=0,mid,mid1;
+	data.open("data.txt",ios::in|ios::out);
+	flag=bsearch(&mid1,&mid);
+	if(flag==0)
+		cout<<endl<<"\n\nContact does not exist..";
+	else
+	{
+		data.seekg(ind[mid1],ios::beg);
+		data.getline(Buffer,100,'#');
+		Buffer[0]='*';
+		pri[mid1][0]='*';
+		sec[mid][0]='*';
+		data.seekg(ind[mid1],ios::beg);
+		data<<Buffer;
+		cout<<endl<<"\nContact Deleted!";
+		I.WriteIndex();
+		getch();
+	}
+	data.close();
+}
+
+void directory::DisplayI()
+{
+	directory I;
+	int mid1,mid,flag1=0;
+	char Buffer[100],name[20];
+	data.open("data.txt",ios::in);
+	flag1=bsearch(&mid1,&mid);
+	if(flag1==0)
+		cout<<endl<<"\nCONTACT DOES NOT EXIST";
+	else
+	{
+		cout<<"\n\nCONTACT FOUND!! \n";
+		data.seekg(ind[mid1]);
+		data.getline(Buffer,100,'#');
+		sscanf(Buffer,"|%[^|]|%[^|]|%[^|]|%[^|]|%[^|]#",a.num,a.name,a.address,a.work,a.group);
+		fflush(stdout);
+		cout<<"\n\nContact details : ";
+		cout<<endl<<"Number : "<<a.num;
+		cout<<endl<<"\nName : "<<a.name;
+		cout<<endl<<"\nAddress : "<<a.address;
+		cout<<endl<<"\nWork : "<<a.work;
+		cout<<endl<<"\nGroup : "<<a.group;
+		  //wrote em.
+
+	}
+	data.close();
+	return;
+}
+
+void directory::showall()
+{
+	directory I;
+	char B[100],A[100];
+	char f[20],b[20],c[20],d[20],e[20];
+	data.open("data.txt",ios::in);
+	while(1)
+	{
+		data.getline(B,100,'#');
+		strcpy(A,B);
+		if(data.eof())
+			break;
+
+		sscanf(A,"%[^|]|%[^|]|%[^|]|%[^|]|%[^|]#",f,b,c,d,e);
+		sscanf(B,"|%[^|]|%[^|]|%[^|]|%[^|]|%[^|]#",a.num,a.name,a.address,a.work,a.group);
+		fflush(stdout);
+		if(f[0]=='*')
+		{       cout<<"\nThis is a deleted contact.. skipping.";
+			continue;
+		}
+		if(strcmp(B,'\0')==0)
+		{
+			cout<<"\nThere are no contacts to be found :(";
+			return;
+		}
+		cout<<"\n\nContact details : ";
+		cout<<endl<<"Number : "<<a.num;
+		cout<<endl<<"\nName : "<<a.name;
+		cout<<endl<<"\nAddress : "<<a.address;
+		cout<<endl<<"\nWork : "<<a.work;
+		cout<<endl<<"\nGroup : "<<a.group;
+		cout<<"\n************************************\n";
+		getch();
+		/*cout<<"Stop? Y or N? : ";      //random stop function!
+		cin>>a;
+		if(a=='y'||a=='N')
+		  break;*/
+
+	}
+ }
+void directory::Sorteddisplay()
+{
+	directory I;
+	int flag=0;
+	char B[100],group[20];
+	data.open("data.txt",ios::in);
+	cout<<"\nWhich group do you want to search for?\n";
+	gets(group);
+	while(1)
+	{
+		data.getline(B,100,'#');
+		if(data.eof())
+			break;
+		sscanf(B,"|%[^|]|%[^|]|%[^|]|%[^|]|%[^|]#",a.num,a.name,a.address,a.work,a.group);
+		fflush(stdout);
+		if(strcmp(group,a.group)==0)
+		{
+			flag=1;
+			cout<<"\n"<<group<<" Group contact details : ";
+			cout<<endl<<"Number : "<<a.num;
+			cout<<endl<<"\nName : "<<a.name;
+			cout<<endl<<"\nAddress : "<<a.address;
+			cout<<endl<<"\nWork : "<<a.work;
+			cout<<endl<<"\nGroup : "<<a.group;
+			cout<<"\n************************************\n";
+			getch();
+		}
+	}
+	if(flag==0)
+	{
+		cout<<"Sorry , you haven't inputted any contacts of that group! :(";
+		getch();
+		return;
+	}
+ }
+void directory::Erase()
+{
+	char dec,dec1;
+	cout<<"\nAre you sure about this? (Y or N) : ";
+	cin>>dec;
+	if(dec=='n'||dec=='N')
+		return;
+	cout<<"Really sure? (Y or N) : ";
+	cin>>dec1;
+	if(dec1=='n'||dec1=='N')
+		return;
+	remove("index.txt");
+	remove("data.txt" );
+	remove("secondaryindex.txt");
+	cout<<"Loading.";
+	delay(650);
+	cout<<".";
+	delay(650);
+	cout<<".";
+	delay(650);
+	cout<<"\n\nEVERYTHING IS RESET!";
+	getch();
+}
+
+void directory::LoadIndex()
+{
+	char buffer[100],temp[100];
+	count=0;
+	index.open("index.txt",ios::in);
+	secind.open("secondaryindex.txt",ios::in);
+	while(index)
+	{
+		index.getline(buffer,100,'#');
+		if(index.eof())
+		{
+			break;
+		}
+		sscanf(buffer,"|%[^|]|%[^|]",pri[count],temp);
+		ind[count]=atoi(temp);
+		count++;
+	}
+		count1=0;
+	while(secind)
+	{
+		secind.getline(buffer,100,'#');
+		if(secind.eof())
+			break;
+		sscanf(buffer,"|%[^|]|%[^|]",sec[count1],usn[count1]);
+		count1++;
+	}
+	index.close();
+	secind.close();
+}
+
+void directory::WriteIndex()
+{
+	char buffer[100];
+	index.open("index.txt",ios::out);
+	secind.open("secondaryindex.txt",ios::out);
+	sort1();
+	sort2();
+	for(i=0;i<count;i++)
+	{
+		itoa(ind[i],buffer,10);
+		index<<"|"<<pri[i]<<"|"<<buffer<<"|"<<"#";
+	}
+	for(i=0;i<count1;i++)
+	{
+
+		secind<<"|"<<sec[i]<<"|"<<usn[i]<<"|"<<"#";
+	}
+	index.close();
+	secind.close();
+}
+
+void main()
+{
+	directory I;
+	int i,k,l;
+	char name[20];
+	clrscr();
+
+	I.LoadIndex();
+	int true=1,ch,flag=0;
+	while(true)
+	{
+	  if(flag=1){
+
+	for(i=1;i<=79;i++)
+	{
+			gotoxy(i,2);
+			cout<<char(178);
+			delay(3);
+	}
+	for(k=1;k<=79;k++)
+	{
+			gotoxy(k,23);
+			cout<<char(178);
+			delay(1);
+	}
+	for(l=22;l>=2;l--)
+	{
+		for(i=79;i>=60;i--)
+		{
+			gotoxy(i,l);
+			cout<<char(178);
+			delay(1);
+		}
+	}
+	}
+
+		int c;
+		cout<<"\n*******PHONE DIRECTORY!!*******\n1.Insert a contact!\n2.Delete a Contact!\n3.Find a Contact!\n4.Show all contacts.\n5.Grouped Contacts!\n6.Reset the files!\n&.Any other number to exit.";
+		cout<<"\n          .----------------.\n";
+		cout<<"	 /    _H______H_    \\@,\n";
+		cout<<"	 \\____/        \\____/ @,\n";
+		cout<<"	    /           \\     `@ \n";
+		cout<<"	    |  LI LI LI  |    ,@  \n";
+		cout<<"	    |  LI LI LI  |   ,@' \n";
+		cout<<"	    |  LI LI LI  |  ,@' \n";
+		cout<<"	    |  LI LI LI  |@@' \n";
+		cout<<"            \\            /' \n";
+		cout<<"	     `----------' \n";
+		cout<<"\n Enter your choice : ";
+		cin>>c;
+		switch(c)
+		{
+			case 1:I.Insert();
+				index.close();
+				secind.close();
+				data.close();
+				break;
+			case 2:I.Delete();
+				index.close();
+				secind.close();
+				data.close();
+				break;
+			case 3:I.DisplayI();
+				index.close();
+				secind.close();
+				data.close();
+				break;
+			case 4:I.showall();
+
+				index.close();
+				secind.close();
+				data.close();
+				break;
+			case 5:I.Sorteddisplay();
+
+				index.close();
+				secind.close();
+				data.close();
+				break;
+			case 6:I.Erase();
+
+				index.close();
+				secind.close();
+				data.close();
+				break;
+			default:exit(0);
+		}
+		getch();
+		clrscr();
+	}
+}
+
+void sort1()
+{
+	char temp[20];
+	int tempind;
+	for(i=0;i<count;i++)
+	{
+		for(j=i+1;j<count;j++)
+		{
+			if(strcmpi(pri[i],pri[j])>0)
+			{
+				strcpy(temp,pri[i]);
+				strcpy(pri[i],pri[j]);
+				strcpy(pri[j],temp);
+				tempind=ind[j];
+				ind[j]=ind[i];
+				ind[i]=tempind;
+			}
+		}
+	}
+}
+
+void sort2()
+{
+	char temp[40];
+	for(i=0;i<count;i++)
+	{
+		for(j=i+1;j<count;j++)
+		{
+			if(strcmp(sec[j],sec[i])<0)
+			{
+				strcpy(temp,sec[i]);
+				strcpy(sec[i],sec[j]);
+				strcpy(sec[j],temp);
+				strcpy(temp,usn[i]);
+				strcpy(usn[i],usn[j]);
+				strcpy(usn[j],temp);
+			}
+		}
+	}
+}
+
